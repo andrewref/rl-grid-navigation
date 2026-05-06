@@ -2,7 +2,7 @@
 
 Obstacle-avoiding robot navigation in a 2D grid world using tabular reinforcement learning.
 
-A mobile robot learns to navigate from a start cell to a goal cell while avoiding obstacles, using **Value Iteration** and **Q-Learning**. The environment is modeled as a discrete Markov Decision Process (MDP) and implemented from scratch in Python (no external RL libraries).
+A mobile robot learns to navigate from a start cell to a goal cell while avoiding obstacles, using **Value Iteration** and **Q-Learning**. The environment is modelled as a discrete Markov Decision Process (MDP) and implemented from scratch in Python (no external RL libraries).
 
 ## Algorithms
 
@@ -11,59 +11,85 @@ A mobile robot learns to navigate from a start cell to a goal cell while avoidin
 
 ## Environment
 
-- **State space:** each free cell on an `N x N` grid.
-- **Action space:** up, down, left, right.
-- **Rewards:** `+100` for reaching the goal, `-10` for hitting an obstacle, `-1` per step.
-- **Transitions:** deterministic; invalid moves (into walls or obstacles) leave the agent in place.
+| Property | Value |
+|---|---|
+| State space | every free cell on an `N × N` grid |
+| Action space | up, down, left, right |
+| Goal reward | `+100` |
+| Obstacle penalty | `−10` (replaces the step penalty) |
+| Step penalty | `−1` per transition |
+| Transitions | deterministic; invalid moves leave the agent in place |
 
 ## Project Structure
 
 ```
 rl-grid-navigation/
-├── src/                 # source code (environment, agents, training loops)
-├── results/             # training curves, trajectory plots, saved policies
-├── notebooks/           # exploratory analysis and visualizations
+├── src/
+│   ├── __init__.py
+│   ├── environment.py      # GridEnvironment (MDP)
+│   ├── value_iteration.py  # ValueIteration agent
+│   ├── q_learning.py       # QLearningAgent
+│   ├── visualize.py        # plotting helpers
+│   └── compare.py          # orchestration script
+├── tests/
+│   ├── test_environment.py
+│   ├── test_value_iteration.py
+│   └── test_q_learning.py
+├── results/                # generated plots (gitignored except .gitkeep)
+├── main.py                 # thin entry point
 ├── requirements.txt
-├── .gitignore
-└── README.md
+└── .gitignore
 ```
 
 ## Setup
 
 ```bash
-# Clone the repo
-git clone https://github.com/<your-username>/rl-grid-navigation.git
+git clone https://github.com/andrewref/rl-grid-navigation.git
 cd rl-grid-navigation
 
-# Create a virtual environment (recommended)
 python -m venv venv
-source venv/bin/activate    # on Windows: venv\Scripts\activate
+# Windows:
+venv\Scripts\activate
+# macOS / Linux:
+source venv/bin/activate
 
-# Install dependencies
 pip install -r requirements.txt
 ```
 
 ## Usage
 
 ```bash
-# Run Value Iteration
-python src/value_iteration.py
+# Run both algorithms and save plots to results/
+py main.py
 
-# Train Q-Learning agent
-python src/q_learning.py
+# Custom grid size, episode count, and random seed
+py main.py --grid-size 7 --episodes 2000 --seed 0
 
-# Compare both algorithms
-python src/compare.py
+# Run only the comparison module directly
+py -m src.compare --episodes 1000 --seed 42
+
+# Run tests
+py -m pytest
 ```
 
-## Evaluation
+## Evaluation Metrics
 
 Both algorithms are compared on:
 
-- Convergence speed (iterations / episodes to convergence)
-- Quality of the learned policy (does it find the shortest path?)
-- Trajectory from start to goal under the learned policy
-- Episode reward and length curves (Q-Learning)
+- **Convergence speed** — iterations (VI) or episodes (Q-Learning) to convergence
+- **Policy quality** — does the greedy policy find the shortest path?
+- **Greedy trajectory** — path from start to goal under the final policy
+- **Training curve** — episode reward and smoothed moving average (Q-Learning)
+
+## Results (5 × 5 grid, default obstacles)
+
+| Algorithm | Convergence | Greedy steps | Greedy reward |
+|---|---|---|---|
+| Value Iteration | 9 iterations | 8 | 93.0 |
+| Q-Learning | 1 000 episodes | 8 | 93.0 |
+
+Both algorithms recover the same 8-step optimal path.
+Plots are saved to `results/` after each run.
 
 ## Team
 
